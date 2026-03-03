@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Line & Light Studio - Admin Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #1B3C34; }
+
+    /* Login */
+    .login-container { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #f0f6f4; }
+    .login-box { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(27,60,52,0.1); width: 100%; max-width: 400px; text-align: center; }
+    .login-box img { width: 120px; margin-bottom: 20px; }
+    .login-box h1 { color: #1B3C34; margin-bottom: 6px; font-size: 22px; }
+    .login-box p { color: #687076; margin-bottom: 30px; font-size: 14px; }
+    .login-box input { width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 16px; margin-bottom: 16px; }
+    .login-box input:focus { outline: none; border-color: #1B3C34; box-shadow: 0 0 0 3px rgba(27,60,52,0.1); }
+    .login-box button { width: 100%; padding: 12px; background: #1B3C34; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; transition: all 0.2s; }
+    .login-box button:hover { background: #142e28; }
+    .login-error { color: #ef4444; margin-bottom: 16px; font-size: 14px; }
+
+    /* Dashboard */
+    .dashboard { display: none; }
+    .dashboard.active { display: block; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+    /* Header */
+    .header {
+      background: #1B3C34;
+      color: white;
+      padding: 24px 30px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .header-left img { width: 48px; height: 48px; border-radius: 8px; background: white; padding: 4px; }
+    .header h1 { font-size: 24px; font-weight: 600; }
+    .header p { font-size: 13px; opacity: 0.8; }
+    .logout-btn { background: rgba(255,255,255,0.15); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+    .logout-btn:hover { background: rgba(255,255,255,0.25); }
+
+    /* Table */
+    .submissions-table { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #f0f6f4; padding: 14px 16px; text-align: left; font-weight: 600; color: #1B3C34; border-bottom: 2px solid #e5e7eb; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+    td { padding: 14px 16px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+    tr:hover { background: #fafafa; }
+    .project-id { font-weight: 600; color: #1B3C34; font-size: 13px; }
+
+    /* Buttons */
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    button { padding: 8px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.2s; font-weight: 500; }
+    .btn-view { background: #1B3C34; color: white; }
+    .btn-view:hover { background: #142e28; }
+    .btn-internal { background: #8B4513; color: white; }
+    .btn-internal:hover { background: #6d3610; }
+    .btn-client { background: #2563eb; color: white; }
+    .btn-client:hover { background: #1d4ed8; }
+    .btn-delete { background: #ef4444; color: white; }
+    .btn-delete:hover { background: #dc2626; }
+
+    /* Modal */
+    .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+    .modal.active { display: flex; }
+    .modal-content { background: white; border-radius: 12px; padding: 30px; max-width: 700px; width: 90%; max-height: 85vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .modal-header h2 { color: #1B3C34; font-size: 20px; }
+    .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #687076; padding: 4px 8px; }
+    .close-btn:hover { color: #1B3C34; }
+
+    .detail-section { margin-bottom: 24px; }
+    .detail-section h3 { color: #1B3C34; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; }
+    .detail-field { margin-bottom: 10px; display: flex; gap: 8px; }
+    .detail-label { font-weight: 600; color: #687076; font-size: 13px; min-width: 120px; }
+    .detail-value { color: #1B3C34; font-size: 14px; }
+
+    .modal-actions { display: flex; gap: 12px; margin-top: 24px; padding-top: 16px; border-top: 1px solid #e5e7eb; }
+
+    .empty-state { text-align: center; padding: 60px 20px; color: #687076; }
+    .empty-state h2 { color: #1B3C34; margin-bottom: 10px; }
+
+    .risk-badge { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+    .risk-high { background: #fef2f2; color: #ef4444; }
+    .risk-medium { background: #fffbeb; color: #d97706; }
+    .risk-low { background: #f0fdf4; color: #16a34a; }
+  </style>
+</head>
+<body>
+  <div class="login-container" id="loginContainer">
+    <div class="login-box">
+      <img src="/assets/logo.png" alt="Line & Light Studio" onerror="this.style.display='none'" />
+      <h1>Line & Light Studio</h1>
+      <p>Admin Dashboard</p>
+      <div class="login-error" id="loginError" style="display: none;"></div>
+      <input type="password" id="passwordInput" placeholder="Enter password" />
+      <button onclick="handleLogin()">Login</button>
+    </div>
+  </div>
+
+  <div class="dashboard" id="dashboard">
+    <div class="container">
+      <div class="header">
+        <div class="header-left">
+          <img src="/assets/logo.png" alt="Logo" onerror="this.style.display='none'" />
+          <div>
+            <h1>Admin Dashboard</h1>
+            <p>Manage project submissions and download reports</p>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="handleLogout()">Logout</button>
+      </div>
+
+      <div class="submissions-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Project ID</th>
+              <th>Client</th>
+              <th>Property Address</th>
+              <th>Risk</th>
+              <th>Submitted</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="submissionsBody">
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 40px;">Loading submissions...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="detailModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Project Details</h2>
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+      </div>
+      <div id="detailContent"></div>
+      <div class="modal-actions" id="modalActions"></div>
+    </div>
+  </div>
+
+  <script>
+    const ADMIN_PASSWORD = 'LineLight2026'
+    const SESSION_KEY = 'admin_authenticated'
+
+    function handleLogin() {
+      const password = document.getElementById('passwordInput').value
+      if (password === ADMIN_PASSWORD) {
+        sessionStorage.setItem(SESSION_KEY, 'true')
+        document.getElementById('loginContainer').style.display = 'none'
+        document.getElementById('dashboard').classList.add('active')
+        loadSubmissions()
+      } else {
+        document.getElementById('loginError').textContent = 'Incorrect password'
+        document.getElementById('loginError').style.display = 'block'
+      }
+    }
+
+    function handleLogout() {
+      sessionStorage.removeItem(SESSION_KEY)
+      document.getElementById('loginContainer').style.display = 'flex'
+      document.getElementById('dashboard').classList.remove('active')
+      document.getElementById('passwordInput').value = ''
+      document.getElementById('loginError').style.display = 'none'
+    }
+
+    function checkAuth() {
+      if (!sessionStorage.getItem(SESSION_KEY)) {
+        document.getElementById('loginContainer').style.display = 'flex'
+        document.getElementById('dashboard').classList.remove('active')
+      } else {
+        document.getElementById('loginContainer').style.display = 'none'
+        document.getElementById('dashboard').classList.add('active')
+        loadSubmissions()
+      }
+    }
+
+    document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') handleLogin()
+    })
+
+    function getRiskClass(level) {
+      if (!level) return ''
+      const l = (typeof level === 'string' ? level : '').toUpperCase()
+      if (l === 'HIGH') return 'risk-high'
+      if (l === 'MEDIUM') return 'risk-medium'
+      if (l === 'LOW') return 'risk-low'
+      return ''
+    }
+
+    async function loadSubmissions() {
+      try {
+        const response = await fetch('/api/admin/submissions')
+        const data = await response.json()
+        const submissions = data.submissions || []
+
+        if (submissions.length === 0) {
+          document.getElementById('submissionsBody').innerHTML = `
+            <tr>
+              <td colspan="6">
+                <div class="empty-state">
+                  <h2>No submissions yet</h2>
+                  <p>Submissions will appear here when clients submit the survey</p>
+                </div>
+              </td>
+            </tr>
+          `
+          return
+        }
+
+        const html = submissions.map(sub => {
+          const risk = sub.report?.hazardAssessment?.overallRisk || 'Unknown'
+          const riskClass = getRiskClass(risk)
+          const clientName = sub.section1?.clientName || 'N/A'
+          return `
+          <tr>
+            <td class="project-id">${sub.projectId}</td>
+            <td>${clientName}</td>
+            <td>${sub.section1?.address || 'N/A'}</td>
+            <td><span class="risk-badge ${riskClass}">${risk}</span></td>
+            <td>${new Date(sub.submittedAt).toLocaleDateString('en-AU')}</td>
+            <td class="actions">
+              <button class="btn-view" onclick="viewDetails('${sub.projectId}')">View</button>
+              <button class="btn-internal" onclick="downloadPDF('${sub.projectId}', 'internal')" title="Internal report with cost guide">Internal PDF</button>
+              <button class="btn-client" onclick="downloadPDF('${sub.projectId}', 'client')" title="Client report without cost guide">Client PDF</button>
+              <button class="btn-delete" onclick="deleteSubmission('${sub.projectId}')">Delete</button>
+            </td>
+          </tr>
+        `}).join('')
+
+        document.getElementById('submissionsBody').innerHTML = html
+      } catch (error) {
+        console.error('Error loading submissions:', error)
+        document.getElementById('submissionsBody').innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; color: #ef4444;">Error loading submissions</td>
+          </tr>
+        `
+      }
+    }
+
+    async function viewDetails(projectId) {
+      try {
+        const response = await fetch(`/api/admin/submission/${projectId}`)
+        const data = await response.json()
+        const sub = data.submission
+
+        const risk = sub.report?.hazardAssessment?.overallRisk || 'Unknown'
+        const riskClass = getRiskClass(risk)
+        const hazardCount = sub.report?.hazardAssessment?.hazardCount || 0
+        const cost = sub.report?.costGuide?.estimatedCost
+        const costStr = cost ? '$' + cost.toLocaleString() : 'N/A'
+
+        const html = `
+          <div class="detail-section">
+            <h3>Property Information</h3>
+            <div class="detail-field">
+              <div class="detail-label">Address</div>
+              <div class="detail-value">${sub.section1?.address || 'N/A'}</div>
+            </div>
+            <div class="detail-field">
+              <div class="detail-label">Client</div>
+              <div class="detail-value">${sub.section1?.clientName || 'N/A'}</div>
+            </div>
+            <div class="detail-field">
+              <div class="detail-label">Lot/DP</div>
+              <div class="detail-value">${sub.section1?.lotDp || 'N/A'}</div>
+            </div>
+            <div class="detail-field">
+              <div class="detail-label">Intended Use</div>
+              <div class="detail-value">${sub.section1?.intendedUse || 'N/A'}</div>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h3>Project Details</h3>
+            <div class="detail-field">
+              <div class="detail-label">Type</div>
+              <div class="detail-value">${sub.section2?.projectType || 'N/A'}</div>
+            </div>
+            <div class="detail-field">
+              <div class="detail-label">Floor Area</div>
+              <div class="detail-value">${sub.section2?.floorArea || 'N/A'} m²</div>
+            </div>
+            <div class="detail-field">
+              <div class="detail-label">Bedrooms</div>
+              <div class="detail-value">${sub.section2?.bedrooms || 'N/A'}</div>
+            </div>
+            <div class="detail-field">
+              <div class="detail-label">Bathrooms</div>
+              <div class="detail-value">${sub.section2?.bathrooms || 'N/A'}</div>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h3>Budget & Timeline</h3>
+            <div class="detail-field">
+              <div class="detail-label">Budget</div>
+              <div class="detail-value">${sub.section8?.budget ? '$' + parseInt(sub.section8.budget).toLocaleString() : 'N/A'}</div>
+            </div>
+            <div class="detail-field">
+              <div class="detail-label">Timeline</div>
+              <div class="detail-value">${sub.section8?.timeline || 'N/A'}</div>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h3>Hazard Assessment</h3>
+            <div class="detail-field">
+              <div class="detail-label">Overall Risk</div>
+              <div class="detail-value"><span class="risk-badge ${riskClass}">${risk}</span></div>
+            </div>
+            <div class="detail-field">
+              <div class="detail-label">Hazards Found</div>
+              <div class="detail-value">${hazardCount}</div>
+            </div>
+            <div class="detail-field">
+              <div class="detail-label">Est. Cost</div>
+              <div class="detail-value">${costStr}</div>
+            </div>
+          </div>
+        `
+
+        document.getElementById('detailContent').innerHTML = html
+        document.getElementById('modalActions').innerHTML = `
+          <button class="btn-internal" onclick="downloadPDF('${projectId}', 'internal')">Download Internal PDF</button>
+          <button class="btn-client" onclick="downloadPDF('${projectId}', 'client')">Download Client PDF</button>
+          <button class="btn-view" onclick="previewReport('${projectId}', 'internal')">Preview Internal</button>
+          <button class="btn-client" onclick="previewReport('${projectId}', 'client')">Preview Client</button>
+        `
+        document.getElementById('detailModal').classList.add('active')
+      } catch (error) {
+        console.error('Error loading details:', error)
+        alert('Error loading submission details')
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('detailModal').classList.remove('active')
+    }
+
+    function downloadPDF(projectId, type) {
+      const endpoint = type === 'client' ? 'pdf-client' : 'pdf'
+      window.location.href = `/api/admin/submission/${projectId}/${endpoint}`
+    }
+
+    function previewReport(projectId, type) {
+      const endpoint = type === 'client' ? 'report-client' : 'report'
+      window.open(`/api/submissions/${projectId}/${endpoint}?token=admin`, '_blank')
+    }
+
+    async function deleteSubmission(projectId) {
+      if (!confirm('Are you sure you want to delete this submission?')) return
+
+      try {
+        const response = await fetch(`/api/admin/submission/${projectId}`, { method: 'DELETE' })
+        const data = await response.json()
+        if (data.success) {
+          loadSubmissions()
+        }
+      } catch (error) {
+        console.error('Error deleting submission:', error)
+        alert('Error deleting submission')
+      }
+    }
+
+    window.addEventListener('load', checkAuth)
+  </script>
+</body>
+</html>

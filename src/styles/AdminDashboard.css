@@ -1,0 +1,302 @@
+.admin-dashboard {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.dashboard-header {
+  margin-bottom: 40px;
+}
+
+.dashboard-header h1 {
+  color: #1b6b5c;
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.dashboard-header p {
+  color: #666;
+  font-size: 16px;
+}
+
+.dashboard-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+
+.submissions-list {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.submissions-list h2 {
+  color: #1b6b5c;
+  margin-bottom: 20px;
+  font-size: 20px;
+}
+
+.no-submissions {
+  text-align: center;
+  color: #999;
+  padding: 40px 20px;
+}
+
+.submissions-grid {
+  display: grid;
+  gap: 12px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.submission-card {
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 4px;
+  border-left: 4px solid #ddd;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submission-card:hover {
+  background: #f0f0f0;
+  border-left-color: #1b6b5c;
+}
+
+.submission-card.selected {
+  background: #e8f5f3;
+  border-left-color: #1b6b5c;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.card-header h3 {
+  color: #1b6b5c;
+  font-size: 14px;
+  margin: 0;
+  flex: 1;
+}
+
+.project-id {
+  font-size: 11px;
+  color: #999;
+  background: white;
+  padding: 4px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.card-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.meta-item .label {
+  font-size: 11px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.meta-item .value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.risk-badge {
+  font-weight: 700 !important;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #ddd;
+  padding-top: 8px;
+}
+
+.submitted-date {
+  font-size: 12px;
+  color: #999;
+}
+
+.submission-details {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 15px;
+}
+
+.details-header h2 {
+  color: #1b6b5c;
+  font-size: 20px;
+  margin: 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #999;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  color: #333;
+}
+
+.details-tabs {
+  display: grid;
+  gap: 20px;
+}
+
+.details-section {
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 4px;
+}
+
+.details-section h3 {
+  color: #1b6b5c;
+  font-size: 14px;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.detail-field:last-child {
+  border-bottom: none;
+}
+
+.detail-field .label {
+  font-weight: 600;
+  color: #666;
+  font-size: 13px;
+}
+
+.detail-field .value {
+  color: #333;
+  font-size: 13px;
+  text-align: right;
+}
+
+.detail-field a {
+  color: #1b6b5c;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.detail-field a:hover {
+  text-decoration: underline;
+}
+
+.details-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 15px;
+}
+
+.btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-secondary {
+  background: #e0e0e0;
+  color: #333;
+  flex: 1;
+}
+
+.btn-secondary:hover {
+  background: #d0d0d0;
+}
+
+.btn-small {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-content {
+    grid-template-columns: 1fr;
+  }
+
+  .submissions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    max-height: none;
+  }
+
+  .submission-details {
+    max-height: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-dashboard {
+    padding: 20px 10px;
+  }
+
+  .card-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-field {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .detail-field .value {
+    text-align: left;
+    margin-top: 4px;
+  }
+}
