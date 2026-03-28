@@ -3,6 +3,7 @@ import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import fs from 'fs'
 import multer from 'multer'
+import nodemailer from 'nodemailer'
 import { geocodeAddress } from './geocoding.js'
 import { performHazardResearch } from './property-hazard-research.js'
 import { buildFeasibilityReport } from './report-builder.js'
@@ -138,6 +139,60 @@ app.post('/api/submit-survey', async (req, res) => {
     saveSubmissions(submissions)
 
     console.log(`[Submit] Saved submission ${submission.id}`)
+
+    // Step 6: Send email notification
+    try {
+      if (process.env.GMAIL_APP_PASSWORD) {
+        const transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: {
+            user: 'jdhays88@gmail.com',
+            pass: process.env.GMAIL_APP_PASSWORD,
+          },
+        })
+        const s1 = surveyData.section1 || {}
+        const s2 = surveyData.section2 || {}
+        const s8 = surveyData.section8 || {}
+        const subject = `New Project Brief: ${s1.address || 'Unknown Address'}`
+        const html = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: #1B6B5C; padding: 20px; text-align: center;">
+              <h1 style="color: white; margin: 0; font-size: 22px;">Line &amp; Light Studio</h1>
+              <p style="color: #a8d5cc; margin: 5px 0 0;">New Project Brief Submission</p>
+            </div>
+            <div style="padding: 24px; background: #f9f9f9;">
+              <h2 style="color: #1B6B5C; margin-top: 0;">Client Details</h2>
+              <p><strong>Name:</strong> ${s1.ownerName || 'Not provided'}</p>
+              <p><strong>Email:</strong> ${s1.ownerEmail || 'Not provided'}</p>
+              <p><strong>Phone:</strong> ${s1.ownerPhone || 'Not provided'}</p>
+              <p><strong>Address:</strong> ${s1.address || 'Not provided'}</p>
+              <h2 style="color: #1B6B5C;">Project Details</h2>
+              <p><strong>Project Type:</strong> ${s2.projectType || 'Not provided'}</p>
+              <p><strong>Description:</strong> ${s2.description || 'Not provided'}</p>
+              <p><strong>Budget:</strong> ${s8.budget ? '$' + parseInt(s8.budget).toLocaleString() : 'Not provided'}</p>
+              <h2 style="color: #1B6B5C;">Feasibility Summary</h2>
+              <p><strong>Overall Risk:</strong> ${report.hazardAssessment?.overallRisk || 'Unknown'}</p>
+              <p><strong>Estimated Cost:</strong> ${report.costGuide?.estimatedCost ? '$' + report.costGuide.estimatedCost.toLocaleString() : 'Not calculated'}</p>
+              <div style="margin-top: 24px; padding: 16px; background: #e8f4f1; border-radius: 8px;">
+                <p style="margin: 0; color: #1B6B5C;"><strong>View full submission in your admin dashboard:</strong></p>
+                <p style="margin: 8px 0 0;"><a href="https://lineandlightstudio.info/admin" style="color: #1B6B5C;">https://lineandlightstudio.info/admin</a></p>
+              </div>
+            </div>
+          </div>
+        `
+        await transporter.sendMail({
+          from: '"Line & Light Studio" <jdhays88@gmail.com>',
+          to: 'jacob@lineandlightstudio.com.au',
+          subject,
+          html,
+        })
+        console.log(`[Submit] Email notification sent for ${submission.id}`)
+      } else {
+        console.log('[Submit] GMAIL_APP_PASSWORD not set, skipping email')
+      }
+    } catch (emailErr) {
+      console.error('[Submit] Email failed:', emailErr.message)
+    }
 
     res.json({
       success: true,
