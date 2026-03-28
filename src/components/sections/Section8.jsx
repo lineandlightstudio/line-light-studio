@@ -16,7 +16,7 @@ function Section8({ data, onChange }) {
         <input
           id="budget"
           type="number"
-          placeholder="e.g., 1500000"
+          placeholder=""
           value={data.budget || ''}
           onChange={(e) => handleChange('budget', e.target.value)}
         />
@@ -41,7 +41,7 @@ function Section8({ data, onChange }) {
         <label htmlFor="additionalNotes">Additional Notes</label>
         <textarea
           id="additionalNotes"
-          placeholder="e.g., Any other information we should know about your project"
+          placeholder="Any additional information about your project"
           value={data.additionalNotes || ''}
           onChange={(e) => handleChange('additionalNotes', e.target.value)}
         />

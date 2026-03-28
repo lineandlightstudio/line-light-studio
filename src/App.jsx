@@ -251,7 +251,7 @@ export default function App() {
             <h2>1. Property & Client Information</h2>
             <div className="form-group">
               <label>Client Name *</label>
-              <input type="text" value={formData.section1.clientName} onChange={(e) => handleChange('section1', 'clientName', e.target.value)} placeholder="e.g. Grace and James Smith" required />
+              <input type="text" value={formData.section1.clientName} onChange={(e) => handleChange('section1', 'clientName', e.target.value)} placeholder="e.g. Alex and Morgan" required />
             </div>
             <div className="form-group">
               <label>Property Address *</label>
@@ -436,7 +436,7 @@ export default function App() {
             <div className="form-row">
               <div className="form-group">
                 <label>Construction Budget ($)</label>
-                <input type="number" value={formData.section8.budget} onChange={(e) => handleChange('section8', 'budget', e.target.value)} placeholder="e.g. 1500000" />
+                <input type="number" value={formData.section8.budget} onChange={(e) => handleChange('section8', 'budget', e.target.value)} placeholder="" />
               </div>
               <div className="form-group">
                 <label>Preferred Timeline</label>
