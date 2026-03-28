@@ -6,7 +6,7 @@ import { generateFeasibilityStudy } from './feasibility-generator.js'
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'jacob@lineandlightstudio.com.au',
+    user: 'jdhays88@gmail.com',
     pass: process.env.GMAIL_APP_PASSWORD,
   },
 })
@@ -25,7 +25,7 @@ export async function sendSurveyEmail(surveyData) {
 
     console.log('Sending email via Gmail SMTP...')
     const info = await transporter.sendMail({
-      from: '"Line & Light Studio" <jacob@lineandlightstudio.com.au>',
+      from: '"Line & Light Studio" <jdhays88@gmail.com>',
       to: 'jacob@lineandlightstudio.com.au',
       subject: subject,
       html: emailBody,
