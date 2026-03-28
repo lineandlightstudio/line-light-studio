@@ -144,7 +144,10 @@ app.post('/api/submit-survey', async (req, res) => {
     try {
       if (process.env.GMAIL_APP_PASSWORD) {
         const transporter = nodemailer.createTransport({
-          service: 'gmail',
+          host: 'smtp.gmail.com',
+          port: 465,
+          secure: true,
+          family: 4,
           auth: {
             user: 'jdhays88@gmail.com',
             pass: process.env.GMAIL_APP_PASSWORD,
