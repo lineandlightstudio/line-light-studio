@@ -31,6 +31,35 @@ export async function sendSurveyEmail(surveyData) {
     const result = execSync(command, { encoding: 'utf-8' })
     console.log('Email sent successfully:', result)
 
+    // Parse the result to get the message ID
+    let messageId = null
+    try {
+      const resultObj = JSON.parse(result)
+      if (resultObj.messages && resultObj.messages.length > 0) {
+        messageId = resultObj.messages[0].id
+      }
+    } catch (e) {
+      console.log('Could not parse message ID from result')
+    }
+
+    // Apply the "New Enquiries" label to the sent email
+    if (messageId) {
+      try {
+        const labelCommand = `manus-mcp-cli tool call gmail_manage_labels --server gmail --input '${JSON.stringify({
+          operation: 'apply',
+          label_id: 'Label_9',
+          message_ids: [messageId],
+        }).replace(/'/g, "'\\'")}'`
+        
+        console.log('Applying New Enquiries label...')
+        execSync(labelCommand, { encoding: 'utf-8' })
+        console.log('Label applied successfully')
+      } catch (labelError) {
+        console.error('Error applying label:', labelError.message)
+        // Don't fail the whole operation if labeling fails
+      }
+    }
+
     return {
       success: true,
       message: 'Survey submitted and email sent',
