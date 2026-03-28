@@ -1,5 +1,5 @@
 import express from 'express'
-import { execSync } from 'child_process'
+import nodemailer from 'nodemailer'
 import { generateProjectBrief } from './brief-generator.js'
 import { generateFeasibilityStudy } from './feasibility-generator.js'
 
@@ -8,6 +8,15 @@ const PORT = 3001
 
 app.use(express.json())
 app.use(express.static('dist'))
+
+// Configure Gmail SMTP transporter
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'jacob@lineandlightstudio.com.au',
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+})
 
 /**
  * Submit survey endpoint
@@ -49,54 +58,20 @@ async function sendSurveyEmail(surveyData, brief, feasibility) {
     const subject = `New Project Brief Submission: ${surveyData.section1?.address || 'Unnamed Property'}`
     const emailBody = formatSurveyEmailWithAnalysis(surveyData, brief, feasibility)
 
-    // Use MCP Gmail tool to send email
-    const command = `manus-mcp-cli tool call gmail_send_messages --server gmail --input '${JSON.stringify({
-      messages: [
-        {
-          to: 'jacob@lineandlightstudio.com.au',
-          subject: subject,
-          body: emailBody,
-          isHtml: true,
-        },
-      ],
-    }).replace(/'/g, "'\\''")}'`
+    // Send email via Gmail SMTP
+    const info = await transporter.sendMail({
+      from: 'jacob@lineandlightstudio.com.au',
+      to: 'jacob@lineandlightstudio.com.au',
+      subject: subject,
+      html: emailBody,
+    })
 
-    console.log('Sending email via MCP Gmail...')
-    const result = execSync(command, { encoding: 'utf-8' })
-    console.log('Email sent successfully')
-
-    // Parse the result to get the message ID
-    let messageId = null
-    try {
-      const resultObj = JSON.parse(result)
-      if (resultObj.messages && resultObj.messages.length > 0) {
-        messageId = resultObj.messages[0].id
-      }
-    } catch (e) {
-      console.log('Could not parse message ID from result')
-    }
-
-    // Apply the "New Enquiries" label to the sent email
-    if (messageId) {
-      try {
-        const labelCommand = `manus-mcp-cli tool call gmail_manage_labels --server gmail --input '${JSON.stringify({
-          operation: 'apply',
-          label_id: 'Label_9',
-          message_ids: [messageId],
-        }).replace(/'/g, "'\\'")}'`
-        
-        console.log('Applying New Enquiries label...')
-        execSync(labelCommand, { encoding: 'utf-8' })
-        console.log('Label applied successfully')
-      } catch (labelError) {
-        console.error('Error applying label:', labelError.message)
-        // Don't fail the whole operation if labeling fails
-      }
-    }
+    console.log('Email sent successfully:', info.messageId)
 
     return {
       success: true,
       message: 'Email sent',
+      messageId: info.messageId,
     }
   } catch (error) {
     console.error('Error sending email:', error.message)
