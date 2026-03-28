@@ -1,9 +1,18 @@
-import { execSync } from 'child_process'
+import nodemailer from 'nodemailer'
 import { generateProjectBrief } from './brief-generator.js'
 import { generateFeasibilityStudy } from './feasibility-generator.js'
 
+// Configure Gmail SMTP transporter
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'jacob@lineandlightstudio.com.au',
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+})
+
 /**
- * Send survey submission email using MCP Gmail integration
+ * Send survey submission email using Gmail SMTP
  */
 export async function sendSurveyEmail(surveyData) {
   try {
@@ -12,53 +21,17 @@ export async function sendSurveyEmail(surveyData) {
     const feasibility = generateFeasibilityStudy(surveyData)
 
     const subject = `New Project Brief Submission: ${surveyData.section1?.address || 'Unnamed Property'}`
-
     const emailBody = formatSurveyEmailWithAnalysis(surveyData, brief, feasibility)
 
-    // Use MCP Gmail tool to send email
-    const command = `manus-mcp-cli tool call gmail_send_messages --server gmail --input '${JSON.stringify({
-      messages: [
-        {
-          to: 'jacob@lineandlightstudio.com.au',
-          subject: subject,
-          body: emailBody,
-          isHtml: true,
-        },
-      ],
-    }).replace(/'/g, "'\\''")}'`
+    console.log('Sending email via Gmail SMTP...')
+    const info = await transporter.sendMail({
+      from: '"Line & Light Studio" <jacob@lineandlightstudio.com.au>',
+      to: 'jacob@lineandlightstudio.com.au',
+      subject: subject,
+      html: emailBody,
+    })
 
-    console.log('Sending email via MCP Gmail...')
-    const result = execSync(command, { encoding: 'utf-8' })
-    console.log('Email sent successfully:', result)
-
-    // Parse the result to get the message ID
-    let messageId = null
-    try {
-      const resultObj = JSON.parse(result)
-      if (resultObj.messages && resultObj.messages.length > 0) {
-        messageId = resultObj.messages[0].id
-      }
-    } catch (e) {
-      console.log('Could not parse message ID from result')
-    }
-
-    // Apply the "New Enquiries" label to the sent email
-    if (messageId) {
-      try {
-        const labelCommand = `manus-mcp-cli tool call gmail_manage_labels --server gmail --input '${JSON.stringify({
-          operation: 'apply',
-          label_id: 'Label_9',
-          message_ids: [messageId],
-        }).replace(/'/g, "'\\'")}'`
-        
-        console.log('Applying New Enquiries label...')
-        execSync(labelCommand, { encoding: 'utf-8' })
-        console.log('Label applied successfully')
-      } catch (labelError) {
-        console.error('Error applying label:', labelError.message)
-        // Don't fail the whole operation if labeling fails
-      }
-    }
+    console.log('Email sent successfully:', info.messageId)
 
     return {
       success: true,
@@ -111,6 +84,18 @@ function formatSurveyEmailWithAnalysis(data, brief, feasibility) {
       <div class="field">
         <div class="label">Property</div>
         <div class="value">${data.section1?.address || 'Not provided'}</div>
+      </div>
+      <div class="field">
+        <div class="label">Client Name</div>
+        <div class="value">${data.section1?.ownerName || 'Not provided'}</div>
+      </div>
+      <div class="field">
+        <div class="label">Client Email</div>
+        <div class="value">${data.section1?.ownerEmail || 'Not provided'}</div>
+      </div>
+      <div class="field">
+        <div class="label">Client Phone</div>
+        <div class="value">${data.section1?.ownerPhone || 'Not provided'}</div>
       </div>
       <div class="field">
         <div class="label">Project Type</div>
@@ -182,11 +167,11 @@ function formatSurveyEmailWithAnalysis(data, brief, feasibility) {
     <div class="footer">
       <p><strong>Next Steps:</strong></p>
       <ul style="margin: 10px 0; padding-left: 20px;">
-        <li>Review the full project brief and feasibility study (see attached documents)</li>
+        <li>Review the full project brief and feasibility study</li>
         <li>Schedule discovery meeting to discuss ${feasibility.risks.length > 0 ? 'identified risks and' : ''} project vision</li>
         <li>Prepare fee proposal based on complexity and scope</li>
       </ul>
-      <p>Line & Light Studio Project Brief System</p>
+      <p>Line &amp; Light Studio Project Brief System</p>
     </div>
   </div>
 </body>
