@@ -3,7 +3,7 @@ import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import fs from 'fs'
 import multer from 'multer'
-import nodemailer from 'nodemailer'
+import { Resend } from 'resend'
 import { geocodeAddress } from './geocoding.js'
 import { performHazardResearch } from './property-hazard-research.js'
 import { buildFeasibilityReport } from './report-builder.js'
@@ -140,19 +140,10 @@ app.post('/api/submit-survey', async (req, res) => {
 
     console.log(`[Submit] Saved submission ${submission.id}`)
 
-    // Step 6: Send email notification
+    // Step 6: Send email notification via Resend
     try {
-      if (process.env.GMAIL_APP_PASSWORD) {
-        const transporter = nodemailer.createTransport({
-          host: 'smtp.gmail.com',
-          port: 465,
-          secure: true,
-          family: 4,
-          auth: {
-            user: 'jdhays88@gmail.com',
-            pass: process.env.GMAIL_APP_PASSWORD,
-          },
-        })
+      if (process.env.RESEND_API_KEY) {
+        const resend = new Resend(process.env.RESEND_API_KEY)
         const s1 = surveyData.section1 || {}
         const s2 = surveyData.section2 || {}
         const s8 = surveyData.section8 || {}
@@ -183,15 +174,19 @@ app.post('/api/submit-survey', async (req, res) => {
             </div>
           </div>
         `
-        await transporter.sendMail({
-          from: '"Line & Light Studio" <jdhays88@gmail.com>',
+        const { data, error } = await resend.emails.send({
+          from: 'Line & Light Studio <notifications@lineandlightstudio.com.au>',
           to: 'jacob@lineandlightstudio.com.au',
           subject,
           html,
         })
-        console.log(`[Submit] Email notification sent for ${submission.id}`)
+        if (error) {
+          console.error('[Submit] Resend error:', error)
+        } else {
+          console.log(`[Submit] Email notification sent for ${submission.id}, id: ${data.id}`)
+        }
       } else {
-        console.log('[Submit] GMAIL_APP_PASSWORD not set, skipping email')
+        console.log('[Submit] RESEND_API_KEY not set, skipping email')
       }
     } catch (emailErr) {
       console.error('[Submit] Email failed:', emailErr.message)
